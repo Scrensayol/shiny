@@ -1,5 +1,3 @@
-use std::mem;
-
 use nom::IResult;
 
 pub use header::Header;
