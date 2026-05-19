@@ -11,14 +11,13 @@ pub struct Local<'a> {
 }
 
 impl<'a> Local<'a> {
-    pub fn parse_list(input: &'a [u8]) -> IResult<&'a [u8], Vec<Self>> {
+    pub fn parse_list(input: &'a [u8], size_t_width: u8) -> IResult<&'a [u8], Vec<Self>> {
         let (input, length) = le_u32(input)?;
-
-        count(Self::parse, length as usize)(input)
+        count(|i| Self::parse(i, size_t_width), length as usize)(input)
     }
 
-    fn parse(input: &'a [u8]) -> IResult<&'a [u8], Self> {
-        let (input, name) = parse_string(input)?;
+    fn parse(input: &'a [u8], size_t_width: u8) -> IResult<&'a [u8], Self> {
+        let (input, name) = parse_string(input, size_t_width)?;
         let (input, start) = le_u32(input)?;
         let (input, end) = le_u32(input)?;
 
