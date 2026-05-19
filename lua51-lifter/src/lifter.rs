@@ -491,9 +491,9 @@ impl<'a, 'b> Lifter<'a, 'b> {
                     object,
                     method,
                 } => {
-                    let destination = self.get_or_alloc_local[&destination].clone();
-                    let self_arg = self.get_or_alloc_local[&self_arg].clone();
-                    let object = self.get_or_alloc_local[&object].clone();
+                    let destination = self.get_or_alloc_local(destination);
+                    let self_arg = self.get_or_alloc_local(self_arg);
+                    let object = self.get_or_alloc_local(object);
                     statements.push(
                         ast::Assign::new(vec![self_arg.into()], vec![object.clone().into()]).into(),
                     );
