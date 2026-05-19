@@ -30,6 +30,14 @@ pub struct Lifter<'a, 'b> {
 }
 
 impl<'a, 'b> Lifter<'a, 'b> {
+
+    fn get_or_alloc_local(&mut self, register: Register) -> RcLocal {
+    self.locals
+        .entry(register)
+        .or_insert_with(RcLocal::default)
+        .clone()
+}
+
     fn allocate_locals(&mut self) {
         self.upvalues
             .reserve(self.bytecode.number_of_upvalues as usize);
@@ -483,9 +491,9 @@ impl<'a, 'b> Lifter<'a, 'b> {
                     object,
                     method,
                 } => {
-                    let destination = self.locals[&destination].clone();
-                    let self_arg = self.locals[&self_arg].clone();
-                    let object = self.locals[&object].clone();
+                    let destination = self.get_or_alloc_local[&destination].clone();
+                    let self_arg = self.get_or_alloc_local[&self_arg].clone();
+                    let object = self.get_or_alloc_local[&object].clone();
                     statements.push(
                         ast::Assign::new(vec![self_arg.into()], vec![object.clone().into()]).into(),
                     );
