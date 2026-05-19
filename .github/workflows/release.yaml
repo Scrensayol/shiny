@@ -1,8 +1,6 @@
 name: Build and Release
-
 on:
   workflow_dispatch:
-
 jobs:
   get-data:
     name: Read Cargo TOML
@@ -12,17 +10,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@master
-
       - name: Read Cargo TOML
         uses: SebRollen/toml-action@v1.0.2
         id: read_toml
         with:
           file: "./medal/Cargo.toml"
           field: "package.version"
-
     outputs:
       version: ${{ steps.read_toml.outputs.value }}
-
   draft-release:
     name: Create a draft release
     runs-on: ubuntu-latest
@@ -36,7 +31,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: ${{ needs.get-data.outputs.version }}
-
       - name: Create Release
         uses: ncipollo/release-action@v1.14.0
         with:
@@ -56,28 +50,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Windows
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            artifact_name: medal-x86_64.exe
-
-          # Linux
+          # Linux ARM64
           - os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            artifact_name: medal-x86_64-linux-musl
-
-          # macOS
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            artifact_name: medal-x86_64-macos
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            artifact_name: medal-aarch64-macos
-
+            target: aarch64-unknown-linux-musl
+            artifact_name: medal-aarch64-linux-musl
     steps:
       - name: Checkout
         uses: actions/checkout@master
-
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -85,7 +64,6 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: "./medal -> target"
@@ -98,17 +76,11 @@ jobs:
           args: "-p medal --release"
           toolchain: "nightly"
           strip: true
-
       - name: Rename artifact
         shell: bash
         run: |
           ARTIFACT_DIR="target/${{ matrix.target }}/release"
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            mv "${ARTIFACT_DIR}/medal.exe" "${ARTIFACT_DIR}/${{ matrix.artifact_name }}"
-          else
-            mv "${ARTIFACT_DIR}/medal" "${ARTIFACT_DIR}/${{ matrix.artifact_name }}"
-          fi
-
+          mv "${ARTIFACT_DIR}/medal" "${ARTIFACT_DIR}/${{ matrix.artifact_name }}"
       - name: Upload release asset
         uses: svenstaro/upload-release-action@v2
         with:
