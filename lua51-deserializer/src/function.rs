@@ -44,7 +44,7 @@ impl<'a> Function<'a> {
         let (input, closures_length) = le_u32(input)?;
         let (input, closures) = count(|i| Self::parse(i, size_t_width), closures_length as usize)(input)?;
         let (input, positions) = opt(Position::parse)(input)?;
-        let (input, locals) = opt(Local::parse_list)(input)?;
+        let (input, locals) = opt(|i| Local::parse_list(i, size_t_width))(input)?;
         let (input, upvalues) = opt(|i| value::parse_strings(i, size_t_width))(input)?;
 
         Ok((
